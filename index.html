@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>별빛 호수 속 '곽'의 비밀 정원</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 변수 및 리셋 */
+        :root {
+            --bg-dark: #070b19;
+            --bg-deep-teal: #0a2236;
+            --accent-gold: #ffd700;
+            --accent-cyan: #70e4ef;
+            --text-light: #f0f8ff;
+            --card-front: rgba(255, 255, 255, 0.08);
+            --card-back: rgba(10, 34, 54, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Nanum Gothic', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(to bottom, var(--bg-dark) 0%, var(--bg-deep-teal) 70%, #05131e 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        /* 캔버스 배경 (별빛, 호수, 마우스 반짝이) */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 메인 레이아웃 */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        /* 헤더 & 통통 튀는 별명 애니메이션 */
+        header {
+            text-align: center;
+            padding-top: 25px;
+        }
+
+        .header-sub {
+            font-size: 1.05rem;
+            color: var(--accent-cyan);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .nickname-wrap {
+            display: inline-block;
+            margin: 10px 0 15px 0;
+        }
+
+        .nickname {
+            display: inline-block;
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 35px rgba(255, 215, 0, 0.4);
+            animation: bounce 1.6s infinite ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) scale(1, 1);
+            }
+            30% {
+                transform: translateY(-30px) scale(1.08, 0.95) rotate(-2deg);
+            }
+            50% {
+                transform: translateY(0) scale(0.95, 1.05);
+            }
+            65% {
+                transform: translateY(-12px) scale(1.02, 0.98);
+            }
+            80% {
+                transform: translateY(0) scale(1, 1);
+            }
+        }
+
+        /* 모듈형 카드 디자인 */
+        .card-box {
+            background: rgba(12, 28, 48, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(112, 228, 239, 0.22);
+            border-radius: 20px;
+            padding: 25px 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            text-align: center;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(112, 228, 239, 0.4);
+        }
+
+        /* 1. 방문자 환영 인사 */
+        .welcome-section {
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            padding: 12px 18px;
+            border-radius: 25px;
+            border: 1px solid var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 210px;
+            text-align: center;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 12px var(--accent-cyan);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, #00b4db, #0083b0);
+            color: white;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 180, 219, 0.35);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 180, 219, 0.55);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .welcome-message {
+            margin-top: 16px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+            min-height: 28px;
+            word-break: keep-all;
+        }
+
+        /* 2. 좋아하는 것 3가지 (플립 카드) */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            perspective: 1000px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            height: 220px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .flip-card-front {
+            background: var(--card-front);
+            backdrop-filter: blur(6px);
+        }
+
+        .flip-card-front .icon {
+            font-size: 3.6rem;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+
+        .flip-card-front .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .flip-card-front .hint {
+            font-size: 0.78rem;
+            color: var(--accent-cyan);
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        .flip-card-back {
+            background: var(--card-back);
+            transform: rotateY(180deg);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: inset 0 0 15px rgba(112, 228, 239, 0.2);
+        }
+
+        .flip-card-back p {
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: #e0f7fa;
+            word-break: keep-all;
+        }
+
+        /* 3. OX 퀴즈 */
+        .quiz-section {
+            text-align: center;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 22px;
+            color: #ffffff;
+            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .quiz-btns {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .ox-btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            font-size: 2.2rem;
+            font-weight: 800;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        .btn-o {
+            background: rgba(46, 204, 113, 0.18);
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .btn-x {
+            background: rgba(231, 76, 60, 0.18);
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .ox-btn:hover {
+            transform: scale(1.12);
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .quiz-result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quiz-result.correct {
+            background: rgba(46, 204, 113, 0.22);
+            color: #a3e635;
+            border: 1px solid #2ecc71;
+        }
+
+        .quiz-result.wrong {
+            background: rgba(231, 76, 60, 0.22);
+            color: #ff8b8b;
+            border: 1px solid #e74c3c;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* 4. 음악 추천 섹션 */
+        .music-section {
+            text-align: center;
+        }
+
+        .music-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px 15px;
+            margin-top: 15px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed rgba(112, 228, 239, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .song-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+            word-break: keep-all;
+        }
+
+        .song-artist {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .song-desc {
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        /* 폭죽 축하 효과 요소 */
+        .confetti {
+            position: fixed;
+            width: 9px;
+            height: 9px;
+            z-index: 99;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        /* 모바일 최적화 레이아웃 */
+        @media (max-width: 600px) {
+            .nickname {
+                font-size: 3.6rem;
+            }
+            .section-title {
+                font-size: 1.2rem;
+            }
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+            .flip-card {
+                height: 190px;
+            }
+            .input-group input {
+                width: 100%;
+            }
+            .btn {
+                width: 100%;
+            }
+            .container {
+                gap: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 캔버스 배경 (별, 호수 수면, 반짝이 이펙트) -->
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="container">
+        <!-- 헤더 영역 -->
+        <header>
+            <div class="header-sub">✨ 밤하늘 별빛 호수 건너 ✨</div>
+            <div class="nickname-wrap">
+                <span class="nickname" id="nicknameBtn" title="클릭해보세요!">곽</span>
+            </div>
+            <p style="color: #a0c4ff; font-size: 0.95rem;">고요한 숲속 호숫가, '곽'의 비밀 정원입니다.</p>
+        </header>
+
+        <!-- 1. 방문자 환영 인사 섹션 -->
+        <section class="card-box welcome-section">
+            <h2 class="section-title">🌙 숲속 방명록</h2>
+            <p style="font-size: 0.9rem; color: #d0e6f6;">당신의 이름을 남겨주시면 호수의 정령이 인사를 건넵니다.</p>
+            <div class="input-group">
+                <input type="text" id="visitorName" placeholder="이름을 입력하세요" maxlength="12" onkeypress="handleKeyPress(event)">
+                <button class="btn" onclick="greetVisitor()">반갑게 인사하기</button>
+            </div>
+            <div class="welcome-message" id="welcomeMsg"></div>
+        </section>
+
+        <!-- 2. 좋아하는 것 3가지 (카드 뒤집기) -->
+        <section class="card-box">
+            <h2 class="section-title">⭐ 내가 좋아하는 3가지</h2>
+            <p style="text-align: center; font-size: 0.85rem; color: #a0c4ff; margin-bottom: 16px;">
+                (카드를 누르면 숨겨진 진짜 이유가 나타납니다!)
+            </p>
+            <div class="favorites-grid">
+                <!-- 카드 1: 오리 -->
+                <div class="flip-card" onclick="flipCard(this)">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="icon">🦆</div>
+                            <div class="card-title">오리</div>
+                            <div class="hint">탭해서 이유 확인하기 ↺</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <p><b>좋아하는 이유:</b><br>물 위를 여유롭게 둥둥 떠다니는 모습이 너무 평화로워서! 게다가 제 별명 '곽'도 오리가 꽥꽥(곽곽) 울듯 존재감을 발산하라는 원대한 뜻이 담겨 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카드 2: 빵 -->
+                <div class="flip-card" onclick="flipCard(this)">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="icon">🍞</div>
+                            <div class="card-title">빵</div>
+                            <div class="hint">탭해서 이유 확인하기 ↺</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <p><b>좋아하는 이유:</b><br>갓 나온 따끈한 빵 냄새는 찌든 영혼을 치유하는 마법입니다. 세상의 모든 문제는 고소한 빵 한 조각이면 80% 정도 해결된다고 믿습니다!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 카드 3: 잠 -->
+                <div class="flip-card" onclick="flipCard(this)">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="icon">😴</div>
+                            <div class="card-title">잠</div>
+                            <div class="hint">탭해서 이유 확인하기 ↺</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <p><b>좋아하는 이유:</b><br>폭신한 이불 속이야말로 세계 최고의 휴양지입니다. 꿈속에서는 우주 여행도, 갓 구운 빵 100개 먹기도 전부 무료로 가능하거든요!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. OX 퀴즈 섹션 -->
+        <section class="card-box quiz-section">
+            <h2 class="section-title">❓ '곽'에 대한 OX 퀴즈</h2>
+            <div class="quiz-question">
+                <b>Q. "나는 과자를 좋아한다"</b>
+            </div>
+            <div class="quiz-btns">
+                <button class="ox-btn btn-o" onclick="checkQuiz('O')">O</button>
+                <button class="ox-btn btn-x" onclick="checkQuiz('X')">X</button>
+            </div>
+            <div class="quiz-result" id="quizResult"></div>
+        </section>
+
+        <!-- 4. 오늘의 노래 추천 섹션 -->
+        <section class="card-box music-section">
+            <h2 class="section-title">🎶 밤하늘 호수의 음악 추천</h2>
+            <p style="font-size: 0.88rem; color: #b0c4de;">호숫가를 거닐며 듣기 좋은 플레이리스트입니다.</p>
+            <div class="music-card" id="musicCard">
+                <div class="song-title">버튼을 눌러 노래를 추천받으세요!</div>
+                <div class="song-artist">🔮 10가지 감성 곡 대기 중</div>
+                <div class="song-desc">오늘의 분위기에 딱 맞는 음악은?</div>
+            </div>
+            <button class="btn" style="margin-top: 16px;" onclick="recommendSong()">🔮 랜덤 음악 뽑기</button>
+        </section>
+    </div>
+
+    <script>
+        /* ==========================================
+           1. 캔버스 연출 (별빛, 호수, 마우스 반짝이)
+           ========================================== */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let stars = [];
+        let sparkParticles = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        // 배경 밤하늘 별 초기화
+        function initStars() {
+            stars = [];
+            const count = Math.floor((width * height) / 2800);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.75), // 하늘 상단 위주
+                    radius: Math.random() * 1.5 + 0.3,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        // 마우스 및 터치 따라다니는 반짝이 이펙트 생성
+        function addSparkle(x, y) {
+            const colors = ['#70e4ef', '#ffd700', '#ffffff', '#a8efff', '#e0f7fa'];
+            for (let i = 0; i < 3; i++) {
+                sparkParticles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 2.2,
+                    vy: (Math.random() - 0.5) * 2.2 - 0.5,
+                    size: Math.random() * 3.5 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.03 + 0.02
+                });
+            }
+        }
+
+        // 캔버스 그리기 애니메이션 루프
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            // 1) 별빛 반짝임
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) {
+                    star.speed = -star.speed;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, star.alpha)})`;
+                ctx.fill();
+            });
+
+            // 2) 잔잔한 호수 수면 연출 (하단 영역)
+            const lakeY = height * 0.78;
+            const gradient = ctx.createLinearGradient(0, lakeY, 0, height);
+            gradient.addColorStop(0, 'rgba(10, 34, 54, 0.2)');
+            gradient.addColorStop(1, 'rgba(5, 19, 30, 0.85)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, lakeY, width, height - lakeY);
+
+            // 호수 위 잔물결 수평선 효과
+            ctx.strokeStyle = 'rgba(112, 228, 239, 0.08)';
+            ctx.lineWidth = 1;
+            const time = Date.now() * 0.0015;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                let y = lakeY + i * 25 + Math.sin(time + i) * 3;
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // 3) 마우스 반짝이 파티클 갱신 및 그리기
+            for (let i = sparkParticles.length - 1; i >= 0; i--) {
+                let p = sparkParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    sparkParticles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        // 이벤트 리스너: 마우스 및 터치 움직임 추적
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => addSparkle(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                addSparkle(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        /* ==========================================
+           2. 방문자 환영 인사
+           ========================================== */
+        function greetVisitor() {
+            const nameInput = document.getElementById('visitorName');
+            const welcomeMsg = document.getElementById('welcomeMsg');
+            const name = nameInput.value.trim();
+
+            if (name === "") {
+                welcomeMsg.style.color = "#ff8b8b";
+                welcomeMsg.innerHTML = "✨ 이름을 정성스레 입력해주시면 감사하겠습니다!";
+                return;
+            }
+
+            welcomeMsg.style.color = "var(--accent-gold)";
+            welcomeMsg.innerHTML = `🌟 반가워요, <b>${escapeHtml(name)}</b>님! 별빛 호숫가에 오신 것을 진심으로 환영합니다!`;
+            nameInput.value = "";
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                greetVisitor();
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* ==========================================
+           3. 카드 뒤집기
+           ========================================== */
+        function flipCard(cardElement) {
+            cardElement.classList.toggle('flipped');
+        }
+
+        /* ==========================================
+           4. OX 퀴즈 및 폭죽 축하 효과
+           ========================================== */
+        function checkQuiz(userAnswer) {
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.remove('correct', 'wrong', 'show');
+
+            // 강제로 리플로우 발생시켜 애니메이션 재트리거
+            void resultDiv.offsetWidth;
+
+            if (userAnswer === 'X') {
+                resultDiv.className = "quiz-result correct show";
+                resultDiv.innerHTML = "🎉 정답입니다! 과자보다는 고소한 빵 파랍니다!";
+                triggerConfetti();
+            } else {
+                resultDiv.className = "quiz-result wrong show";
+                resultDiv.innerHTML = "😅 땡! 틀렸습니다. 저는 과자보다 빵을 훨씬 좋아한답니다!";
+            }
+        }
+
+        // 정답 시 축하 폭죽 가루 연출
+        function triggerConfetti() {
+            const colors = ['#ffd700', '#70e4ef', '#2ecc71', '#ff7675', '#a29bfe'];
+            for (let i = 0; i < 40; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = (window.innerWidth / 2) + 'px';
+                confetti.style.top = (window.innerHeight * 0.6) + 'px';
+
+                document.body.appendChild(confetti);
+
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 12 + 4;
+                let vx = Math.cos(angle) * velocity;
+                let vy = Math.sin(angle) * velocity - 4;
+                let opacity = 1;
+
+                const timer = setInterval(() => {
+                    vy += 0.4; // 중력
+                    const currentLeft = parseFloat(confetti.style.left);
+                    const currentTop = parseFloat(confetti.style.top);
+
+                    confetti.style.left = (currentLeft + vx) + 'px';
+                    confetti.style.top = (currentTop + vy) + 'px';
+                    opacity -= 0.02;
+                    confetti.style.opacity = opacity;
+
+                    if (opacity <= 0) {
+                        clearInterval(timer);
+                        confetti.remove();
+                    }
+                }, 20);
+            }
+        }
+
+        /* ==========================================
+           5. 오늘의 음악 추천 (10곡 이상)
+           ========================================== */
+        const songList = [
+            { title: "IU (아이유) - 밤편지", artist: "잔잔한 별빛 아래 마음을 전하는 노래", desc: "호숫가 벤치에 앉아 들으면 감성이 폭발합니다." },
+            { title: "BTS - 소우주 (Mikrokosmos)", artist: "우리 모두는 각자의 방에서 반짝이는 별", desc: "밤하늘을 올려다보며 들으면 가슴이 웅장해집니다." },
+            { title: "성시경 - 거리에서", artist: "감성 가득한 밤공기와 딱 어울리는 보컬", desc: "따뜻한 차 한 잔과 함께 듣는 것을 추천해요." },
+            { title: "볼빨간사춘기 - 우주를 줄게", artist: "통통 튀는 별빛 감성의 달콤한 노래", desc: "기분이 절로 좋아지는 마법 같은 트랙입니다." },
+            { title: "검정치마 - EVERYTHING", artist: "몽환적이고 깊은 호수 같은 멜로디", desc: "조용히 눈을 감고 소리에 집중해 보세요." },
+            { title: "Yerin Baek (백예린) - Square", artist: "청량한 바람이 호수 위를 스치는 느낌", desc: "답답한 마음이 한 번에 뻥 뚫리는 기분!" },
+            { title: "AKMU (악뮤) - 달", artist: "밤하늘 달님에게 은밀하게 건네는 이야기", desc: "귀여우면서도 아늑한 감성을 전달합니다." },
+            { title: "폴킴 - 모든 날, 모든 순간", artist: "언제 들어도 따스한 위로가 되는 플레이리스트", desc: "지친 하루 끝에 선물이 되어줄 음악." },
+            { title: "잔나비 - 주저하는 연인들을 위해", artist: "빈티지하고 아날로그적인 밤의 감성", desc: "호수 건너 숲속 오두막에서 들려올 것 같은 노래." },
+            { title: "Coldplay - A Sky Full of Stars", artist: "별빛이 쏟아져 내리는 숲속 축제 분위기", desc: "신나게 어깨를 갹갹 흔들고 싶어집니다!" },
+            { title: "Laufey - From The Start", artist: "달콤하고 부드러운 밤의 재즈 피아노", desc: "따뜻한 빵과 함께 들으면 행복이 2배!" },
+            { title: "오혁 - 소녀", artist: "아련하고 포근하게 밤을 감싸주는 목소리", desc: "고요한 숲속의 밤에 가장 잘 어울리는 솔로 곡." }
+        ];
+
+        let lastSongIndex = -1;
+
+        function recommendSong() {
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * songList.length);
+            } while (randomIndex === lastSongIndex);
+
+            lastSongIndex = randomIndex;
+            const song = songList[randomIndex];
+
+            const musicCard = document.getElementById('musicCard');
+            musicCard.style.opacity = '0';
+            musicCard.style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                musicCard.innerHTML = `
+                    <div class="song-title">🎶 ${song.title}</div>
+                    <div class="song-artist">${song.artist}</div>
+                    <div class="song-desc">"${song.desc}"</div>
+                `;
+                musicCard.style.opacity = '1';
+                musicCard.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        /* ==========================================
+           6. 별명 클릭 이벤트
+           ========================================== */
+        document.getElementById('nicknameBtn').addEventListener('click', function() {
+            addSparkle(window.innerWidth / 2, window.innerHeight * 0.2);
+            this.style.animation = 'none';
+            void this.offsetWidth; // reflow
+            this.style.animation = 'bounce 0.8s ease-in-out';
+        });
+
+        // 초기화
+        window.onload = function() {
+            resizeCanvas();
+            animateCanvas();
+        };
+    </script>
+</body>
+</html>
